@@ -1,0 +1,100 @@
+ /**
+ * from: http://static9.pplive.cn/corporate/player/v_20180921114929_06bed7/dist/player-min.js
+ * parse: k
+ * des: H5端K算法, AES/ECB/NoPadding
+ */
+
+ function(e, t, n) {
+    "use strict";
+    Object.defineProperty(t, "__esModule", {
+        value: !0
+    }), t.H5Crypto = void 0;
+    var i, a = n(207),
+        o = n(34),
+        r = (i = n(205)) && i.__esModule ? i : {
+            default: i
+        },
+        s = r.default.enc.Hex,
+        l = r.default.lib.WordArray,
+        u = r.default.SHA256;
+    t.H5Crypto = {
+        SC_KEY: "UwlJsRX59+ldn2gWmrUnxxFiVuzGL3V@",
+        getRandom: function() {
+            for (var e = "", t = 0; t < 16; t++) {
+                var n = 93 * Math.random() + 33 >> 0;
+                e += String.fromCharCode(n)
+            }
+            return e
+        },
+        getSignature: function(e, t) {
+            var n = this.getRandom(),
+                i = n + e + t,
+                a = this.toHexStr(i),
+                o = u(s.parse(a));
+            return {
+                sign: s.stringify(o),
+                random: this.toHexStr(n)
+            }
+        },
+        toHexStr: function(e) {
+            for (var t = "", n = 0; n < e.length; n++) t += e.charCodeAt(n).toString(16);
+            return t
+        },
+        BytesToStr: function(e) {
+            for (var t, n = e.length, i = [], a = 0; a < n; a++) t = e[a], i.push(String.fromCharCode(t));
+            return i.join("")
+        },
+        secure_key_decrypt: function(e, t, n) {
+            var i = new o.Stream;
+            if (t.length / 2 < 49) return this.BytesToStr(i.pool);
+            var d = s.parse(n),
+                c = new o.Stream(a.bytes.fromBits(d.words)),
+                f = new o.Stream;
+            f.writeUTF(e, !0);
+            var h = new o.Stream;
+            if (c.position = 0, d.sigBytes < 16) return this.BytesToStr(i.pool);
+            f.position = 0, c.readBytes(h, 0, 8), f.readBytes(h, h.length(), f.length()), c.readBytes(h, h.length(), 8);
+            var p = l.create(a.bytes.toBits(h.pool)),
+                _ = u(p),
+                v = new o.Stream(a.bytes.fromBits(_.words));
+            v.position = 0;
+            var m = new o.Stream(a.bytes.fromBits(s.parse(t).words)),
+                g = m.readByte(),
+                y = new o.Stream;
+            m.readBytes(y, 0, m.length() - 1 - 32);
+            var b = new o.Stream;
+            m.readBytes(b, 0, 32);
+            var I = r.default.AES,
+                E = r.default.lib.CipherParams,
+                k = l.create(a.bytes.toBits(v.pool)),
+                C = l.create(a.bytes.toBits(y.pool)),
+                T = I.decrypt(E.create({
+                    ciphertext: C
+                }), k, {
+                    mode: r.default.mode.ECB,
+                    padding: r.default.pad.NoPadding
+                }),
+                w = a.bytes.fromBits(T.words);
+            y.writeBytes(w, 0, w.length), h.clear(), c.position = 8, y.position = 0, c.readBytes(h, 0, 8), y.readBytes(h, h.length(), y.length() - g), c.position = 0, c.readBytes(h, h.length(), 8), h.position = 0, l.create(a.bytes.toBits(h.pool));
+            var S = u(p),
+                O = new o.Stream(a.bytes.fromBits(S.words));
+            return this.eqByteArray(O, b) && (y.position = 0, y.readBytes(i, 0, y.length() - g)), this.BytesToStr(i.pool)
+        },
+        eqByteArray: function(e, t) {
+            if (e.length != t.length) return !1;
+            var n = e.position,
+                i = t.position,
+                a = !0;
+            for (e.position = t.position = 0; e.length >= 4;)
+                if (e.readInt() != t.readInt()) {
+                    a = !1;
+                    break
+                }
+            if (a && 0 != e.length) {
+                var o = e.length;
+                a = 1 == o ? e.readByte() == t.readByte() : 2 == o ? e.readShort() == t.readShort() : 3 != o || e.readShort() == t.readShort() && e.readByte() == t.readByte()
+            }
+            return e.position = n, t.position = i, a
+        }
+    }
+}

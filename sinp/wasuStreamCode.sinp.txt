@@ -1,0 +1,99 @@
+/**
+ * form: https://s.wasu.cn/portal/player/20180801/WsPlayer.swf
+ * parse: streamAuth
+ * des:wasu播放器streamAuth streamCode算法
+*/
+package longyu.widgets.utils
+{
+   import com.adobe.crypto.MD5;
+   import flash.utils.ByteArray;
+   
+   public class StreamUtils
+   {
+       
+      
+      public function StreamUtils()
+      {
+         super();
+      }
+      
+      public static function streamCode(param1:String, param2:String) : *
+      {
+         var _loc3_:String = "wasu!@#48217#$@#1";
+         if(param1.indexOf(".mp4") > 0)
+         {
+            return param1;
+         }
+         return streamAuth(param1,_loc3_,param2,86400);
+      }
+      
+      public static function streamAuth(param1:String, param2:String, param3:String, param4:int) : *
+      {
+         var _loc16_:int = 0;
+         var _loc17_:int = 0;
+         var _loc18_:int = 0;
+         var _loc19_:int = 0;
+         var _loc21_:String = null;
+         var _loc22_:String = null;
+         var _loc23_:String = null;
+         var _loc24_:String = null;
+         var _loc25_:String = null;
+         var _loc5_:int = 4;
+         param2 = getMD5(param2 != ""?param2:"12345678");
+         var _loc6_:String = param2;
+         var _loc7_:String = getMD5(param2.substring(0,16));
+         var _loc8_:String = getMD5(_loc6_.substring(16,32));
+         var _loc9_:String = param1;
+         var _loc10_:String = _loc5_ > 0?param3 == "DECODE"?_loc9_.substring(0,_loc5_):getMD5(String(new Date().getTime() / 1000)).substring(32 - _loc5_):"";
+         var _loc11_:String = _loc7_ + getMD5(_loc7_ + _loc10_);
+         var _loc12_:Number = _loc11_.length;
+         param1 = param3 == "DECODE"?String(Base64Util.decodeToByteArray(param1.substring(_loc5_))):(param4 > 0?param4 + int(new Date().getTime() / 1000):"0000000000") + "" + getMD5(param1 + _loc8_).substring(0,16) + param1;
+         var _loc13_:Number = param1.length;
+         var _loc14_:Array = [];
+         var _loc15_:Array = [];
+         _loc16_ = 0;
+         while(_loc16_ < 128)
+         {
+            _loc14_[_loc16_] = _loc16_;
+            _loc15_[_loc16_] = _loc11_.charCodeAt(_loc16_ % _loc12_) & 255;
+            _loc16_++;
+         }
+         _loc17_ = _loc16_ = 0;
+         while(_loc16_ < 128)
+         {
+            _loc17_ = (_loc17_ + _loc14_[_loc16_] + _loc15_[_loc16_]) % 128;
+            _loc19_ = _loc14_[_loc16_];
+            _loc14_[_loc16_] = _loc14_[_loc17_];
+            _loc14_[_loc17_] = _loc19_;
+            _loc16_++;
+         }
+         var _loc20_:ByteArray = new ByteArray();
+         _loc18_ = _loc17_ = _loc16_ = 0;
+         while(_loc16_ < _loc13_)
+         {
+            _loc18_ = (_loc18_ + 1) % 128;
+            _loc17_ = (_loc17_ + _loc14_[_loc18_]) % 128;
+            _loc19_ = _loc14_[_loc18_];
+            _loc14_[_loc18_] = _loc14_[_loc17_];
+            _loc14_[_loc17_] = _loc19_;
+            _loc20_.writeByte(param1.charCodeAt(_loc16_) & 255 ^ _loc14_[(_loc14_[_loc18_] + _loc14_[_loc17_]) % 128]);
+            _loc16_++;
+         }
+         if(param3 == "DECODE")
+         {
+            _loc21_ = _loc22_ = _loc23_ = _loc24_ = _loc25_ = String(_loc20_);
+            if((int(_loc22_.substring(0,10)) == 0 || int(_loc23_.substring(0,10)) - int(new Date().getTime() / 1000) > 0) && _loc24_.substring(10,26) == getMD5(_loc25_.substring(26) + _loc8_).substring(0,16))
+            {
+               return _loc21_.substring(26);
+            }
+            return "";
+         }
+         return _loc10_ + Base64Util.encodeByteArray(_loc20_);
+      }
+      
+      private static function getMD5(param1:String) : *
+      {
+         return MD5.hash(param1);
+      }
+   }
+}

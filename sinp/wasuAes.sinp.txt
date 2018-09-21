@@ -1,0 +1,39 @@
+/**
+ * form: https://s.wasu.cn/portal/mobile/js/video.js?t=2018053000001 
+ * parse: https://apiontime.wasu.cn/Auth/getVideoUrl?id=8121053&mode=2&key=' +key + '&url=' + url + '&type=jsonp
+ * des:wasu手机端aes加密
+*/
+
+    this.loadVU = function(_0xE628) {
+        if (_0xE628.indexOf(".m" + "p4") > -1 || _0xE628.indexOf(".m3" + "u8") > -1) {
+            return _0xE628
+        };
+        var _0xE5B6 = "0" + "1424364" + "0" + "586" + "0" + "819";
+        var _0xE50B = "5162271485" + "0" + "9" + "0" + "109";
+        var _0xE5EF = "14" + "0" + "24364586" + "00" + "819";
+        var _0xE544 = "51622714859" + "00" + "109";
+        try {
+            var _0xE57D = CryptoJS.enc.Utf8.parse(_0xE5B6);
+            var _0xE4D2 = CryptoJS.enc.Utf8.parse(_0xE50B);
+            var _0xE499 = CryptoJS.AES.decrypt(_0xE628, _0xE57D, {
+                iv: _0xE4D2,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.ZeroPadding
+            });
+            var _0xE661 = CryptoJS.enc.Utf8.stringify(_0xE499).toString()
+        } catch (e) {
+            try {
+                var _0xE57D = CryptoJS.enc.Utf8.parse(_0xE5EF);
+                var _0xE4D2 = CryptoJS.enc.Utf8.parse(_0xE544);
+                var _0xE499 = CryptoJS.AES.decrypt(_0xE628, _0xE57D, {
+                    iv: _0xE4D2,
+                    mode: CryptoJS.mode.CBC,
+                    padding: CryptoJS.pad.ZeroPadding
+                });
+                var _0xE661 = CryptoJS.enc.Utf8.stringify(_0xE499).toString()
+            } catch (e) {
+                return _0xE628
+            }
+        };
+        return _0xE661
+    };

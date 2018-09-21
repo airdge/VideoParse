@@ -1,0 +1,25 @@
+ /**
+ * from: https://aeu.alicdn.com/js/cj/110.js
+ * parse: ckey
+ * des: 可以获取到104#--111#系列ckey,NodeJs必须创建Dom实体来运行, Python下无法使用execjs来运行
+ */
+
+
+var webPage = require('webpage');
+var page = webPage.create();
+var url = "https://m.youku.com/video/id_XNDIwNzg0MzIw.html?spm=a2h0k.8191393.15302.5%212~5~1~3%213~A&source=";
+page.settings.userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:49.0) Gecko/20100101 Firefox/49.0";
+page.customHeaders = {
+    "Referer": "http://m.youku.com/video/id_XNDIwNzg0MzIw.html?spm=a2h0k.8191393.15302.5%212~5~1~3%213~A&source=", 
+};
+page.open(url, function(status) {
+    if (status !== 'success') {
+        console.log('error!');
+    } else {
+        var ckey = page.evaluate(function() { 
+            return window[window.UA_Opt.LogVal];
+        });
+        console.log(ckey);
+    }
+    phantom.exit();
+});

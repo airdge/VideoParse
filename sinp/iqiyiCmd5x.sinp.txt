@@ -1,0 +1,9 @@
+ /**
+ * from: http://static.iqiyi.com/js/common/7d183edd03bc4414b315e8964fb41826.js
+ * parse: vf
+ * des: cmd5x算法 
+ */
+ 
+js = curl('http://static.iqiyi.com/js/common/7d183edd03bc4414b315e8964fb41826.js')
+ctx = execjs.compile(js)
+vf = ctx.call('cmd5x', tmts)

@@ -1,0 +1,278 @@
+ /**
+ * from: https://7.url.cn/edu/webcourse/index_9000b3e.js
+ * parse: auth_ext
+ * des: 腾讯课堂auth_ext相关算法
+ */
+ i.exports = {
+        data: {
+            isShow: !1,
+            playType: null,
+            isTryListen: !1
+        },
+        filters: {},
+        directives: {},
+        methods: {
+            config: function() {
+                var e = this;
+                return n.extend(!0, p, e.size())
+            },
+            eduext: function() {
+                var e = ["uid_uin", "uid_a2", "uid_type", "_guest_type", "uuid", "uin", "luin", "skey", "lskey", "pSkey", "p_skey", "p_uin", "p_lskey", "p_luin", "uid_appid"],
+                    t = function() {
+                        var t = document.cookie,
+                            i = new RegExp("(^| )(" + e.join("|") + ")=([^;]*)(;|$)", "g"),
+                            a = t.match(i) || [];
+                        return n.trim(a.join(""))
+                    },
+                    i = {
+                        course_id: parseInt(this.course_id, 10),
+                        term_id: parseInt(this.term_id, 10),
+                        type: 2,
+                        action: 0,
+                        cookie: t()
+                    },
+                    a = o.getHash("taid") || o.query("taid");
+                "" !== a && (i.taid = parseInt(a, 10));
+                var r = v.encode(JSON.stringify(i));
+                return r
+            },
+            videoTryListen: function(e, t, i, a) {
+                var r = this,
+                    o = !1,
+                    s = 0;
+                n(a).each(function(i, a) {
+                    a.taid !== t || a.vid !== e || 1 !== a.tryListenType && 2 !== a.tryListenType || (o = !0, s = a.tryListenTime)
+                }), r.$el.innerHTML += '<p class="xe_video-try-tips">可试看5分钟，<span class="xe_nor-link">购买课程</span>后看完整版</p>'
+            },
+            isTryListenFunc: function(e, t, i, a) {
+                var r = !1;
+                return n(a).each(function(i, a) {
+                    a.taid !== t || a.vid !== e || 1 !== a.tryListenType && 2 !== a.tryListenType || (r = !0)
+                }), r
+            },
+            getPrice: function(e) {
+                var t = 0;
+                return n(e.terms).each(function(e, i) {
+                    t = i.price
+                }), t
+            },
+            play: function(e, t, i, a, r) {
+                var s = [];
+                r = r._up || {}, this.$set("playType", i), this.$set("isTryListen", this.isTryListenFunc(e, t, i, a, r)), r.length && n.each(r._keys, function(e, t) {
+                    t = r[t], t && 5 === t.type && t.vid && s.push(t.vid)
+                });
+                var l = this;
+                l.playing = !0, x = 2 === (a || {}).agencytype ? 1 : 0;
+                var d = function() {
+                    var r = l.config(),
+                        d = n.cookie.uin();
+                    if (l.player || (l.$el.innerHTML = '<div id="' + (r.containerId = "vplayer_" + e) + '"></div><div class="vplayer_marquee"></div>'), l.getPrice(a) > 0 ? f.show(d + "正在观看视频") : f.hide(), r.vid = e, r.authext = l.eduext(), r.flashvar = r.flashvar || {}, r.flashvar.eduext = r.authext, r.flashvar.loadingswf = "http://vm.gtimg.cn/minivideo_v1/vd/res/skins/ke_loading.swf", d && e && t && i) {
+                        l.history_key = ["vplayer", "history", d, e, t, i].join("_");
+                        var c = parseInt(u.get(l.history_key), 10);
+                        r.connectionPlayTime = c > 0 ? c : 0
+                    }
+                    l.txplayerPlay(r);
+                    var p = o.getHash("taid") || o.query("taid"),
+                        h = function() {
+                            y && y.start(l.player, {
+                                vid: e,
+                                taid: p,
+                                term_id: l.term_id,
+                                agency_type: "" + x,
+                                course_id: l.course_id,
+                                needSign: l.needSign,
+                                source: 1 === i ? 1 : 0
+                            })
+                        };
+                    h(), l.autoplay = function() {
+                        var i = s.indexOf(e),
+                            a = s.length;
+                        return a > 1 && a - 1 > i ? (e = s[++i], l.$emit("autoplay", e, t), r.vid = e, l.player.play(r), h(), !0) : !1
+                    }, l.multiVideo = s.length > 0
+                };
+                window.Txplayer ? d(window.Txplayer) : l.loadTVP("//vm.gtimg.cn/tencentvideo/txp/js/txplayer.js", d)
+            },
+            hideFlashHack: function() {
+                var e = document.getElementsByClassName("txp_overlay_expired");
+                e.length > 0 && (e[0].innerHTML = '<div class="no-flash-ctn"><div class="no-flash-cover"></div><p class="no-flash-wording-large">抱歉，您的浏览器不支持播放我们的课程</p><p class="no-flash-wording">请下载 <a class="nor-link" target="_blank" href="https://www.google.cn/chrome/browser/desktop/index.html">Chrome浏览器</a> 观看</p></div>', clearInterval(l))
+            },
+            txplayerPlay: function(e) {
+                this.player ? this.player.play(e) : (this.player = new Txplayer(e), this.registEventListen(this.player)), T = e, this.show()
+            },
+            registEventListen: function(e) {
+                e.videoOK = !1;
+                var t = this;
+                e.on("ready", function() {
+                    if (n(".txp_overlay_loading_content").hide(), "flash" !== e.getPlayerType()) {
+                        b.show();
+                        var i = function() {
+                            1 === e.getPlayerState() && t.$emit("vplayer.paused")
+                        };
+                        n(".txp_btn_play").on("click", i), n(".txp_shadow").on("click", i)
+                    }
+                }), e.on("playStateChange", function(i) {
+                    switch (i.state) {
+                        case -1:
+                            r();
+                            break;
+                        case 0:
+                            if (e.isWindowFullscreen()) break;
+                            var o = !1;
+                            t.playend = !0, t.sethistory(!0), y && y.stop(), t.$emit("vplayer.allend"), o = t.autoplay(), t.multiVideo || (t.$emit("vplayer.nexttask"), setTimeout(function() {
+                                t.hide()
+                            }, 20));
+                            break;
+                        case 1:
+                            if (!e.videoOK) {
+                                e.videoOK = !0, t.playend = !1, $({
+                                    action: "Play_clk"
+                                }), t.$emit("vplayer.videoOK"), _("播放成功总量", 2722706);
+                                var s = u.get("client_download_tips") || !1;
+                                if (!s && !P) {
+                                    var l = (n(".txp_player.txp_player_external"), n(".txp_progress_bar_container")),
+                                        d = n('<div class="download-ctn js-download-ctn"><div>安装电脑客户端，播放更流畅<a class="download-btn" target="_blank" href="/download/pcapp.html">下载安装</a><i class="icon-font i-close js-download-close"></i></div></div>');
+                                    l.length && d.insertBefore(l), n(".js-download-close").click(function() {
+                                        n(".js-download-ctn").hide(), u.set("client_download_tips", !0)
+                                    })
+                                }
+                            }
+                            "flash" !== e.getPlayerType() && b.hide(), y && y.start();
+                            break;
+                        case 2:
+                            t.sethistory(), y && y.stop(), $({
+                                action: "Pause_clk"
+                            }), "flash" === e.getPlayerType() && t.$emit("vplayer.paused"), a(t);
+                            break;
+                        case 3:
+                            "flash" !== e.getPlayerType() && (n(".txp_overlay_loading").hide(), b.show());
+                            break;
+                        default:
+                            console.log("playStateChange other state", i)
+                    }
+                }), e.on("windowFullscreenChange", function(e) {
+                    e && $({
+                        action: "FullScreen_clk"
+                    })
+                }), e.on("timeupdate", function() {
+                    t.sethistory()
+                }), e.on("error", function(e) {
+                    var i = window.metaData || {},
+                        a = i.terms && i.terms[0] || {},
+                        r = a.price > 0;
+                    r && t.handleError(e), t.isTryListen ? _("试听失败", 2563448) : 2 === t.playType ? _("录播失败", 2563446) : 5 === t.playType && _("回放失败", 2563447), !m.isLogin() && r ? _("视频播放失败，用户未登录", 2730167) : e && 101 === e.exem ? _("录播鉴权失败（未报名）", 2810132) : (_("播放失败总量", 2722707), w(2810287)), e && -700 === e.code && _("播放失败-700错误码", 2722847), window.BJ_REPORT.info({
+                        msg: "tvpOnError, " + JSON.stringify(e),
+                        ext: {
+                            msid: 2118575
+                        }
+                    }), $({
+                        action: "video_play_error",
+                        obj1: k,
+                        obj2: n.cookie.uin(),
+                        ver3: o.getUrlParam("vid"),
+                        ver5: JSON.stringify(e)
+                    }), t.$emit("vplayer.videoErr", e)
+                }), e.on("showUIVipGuide", function(e) {
+                    e && e.trialFinish && h.get("flash").trigger("showPay")
+                })
+            },
+            handleError: function() {
+                m.isLogin() || 2 === self.playType || m.show()
+            },
+            loadTVP: function(e, t) {
+                var i = this;
+                j(e, function() {
+                    t(window.Txplayer)
+                }, function() {
+                    var a = "//vm.gtimg.cn/tencentvideo/txp/js/txplayer.js";
+                    e != a ? i.loadTVP(a, t) : _("tvp 拉取失败", 2893523)
+                }, function() {
+                    return window.Txplayer
+                })
+            },
+            size: function() {
+                var e = this.$header.outerWidth(),
+                    t = Math.max(n(window).height() - (P ? 0 : 60), 300);
+                return n("body").css(window.innerHeight <= 380 ? {
+                    "overflow-y": "auto"
+                } : {
+                    "overflow-y": "hidden"
+                }), {
+                    width: e,
+                    height: t
+                }
+            },
+            resize: function() {
+                var e = this.size();
+                this.player && this.player.resize && this.player.resize(e)
+            },
+            sethistory: function(e) {
+                var t = this;
+                e ? u.remove(t.history_key) : t.history_key && t.player && t.player.getCurrentTime && u.set(t.history_key, t.player.getCurrentTime())
+            },
+            gethistory: function() {
+                return this.player && this.player.getCurrentTime ? this.player.getCurrentTime() || 0 : 0
+            },
+            unplay: function() {
+                var e = this;
+                e.sethistory(), e.hide(), e.playing = !1, y && y.stop()
+            },
+            pause: function() {
+                this.playing = !1, this.player && this.player.pause && this.player.pause()
+            },
+            replay: function() {
+                this.sethistory(!0), T.connectionPlayTime = 0, this.txplayerPlay(T)
+            },
+            show: function() {
+                this.$set("isShow", !0), this.$emit("vplayer.show")
+            },
+            hide: function() {
+                this.$emit("vplayer.hide"), this.$set("isShow", !1), f.hide()
+            }
+        },
+        ready: function() {
+            var e = this;
+            e.$header = n("#ke-header"), e.term_id = o.getHash("term_id") || o.query("term_id"), e.course_id = k, window.__tenplay_showPayTips = function(e) {
+                var t = "(errCode: " + e.em + "." + e.exem + ")";
+                if (83 === e.em) switch (e.exem) {
+                    case 12:
+                        n.modal.alert("参数错误" + t);
+                        break;
+                    case 13:
+                    case 19:
+                        n.modal.alert("超时" + t);
+                        break;
+                    case 14:
+                        n.modal.alert("后台服务错误" + t);
+                        break;
+                    case 101:
+                        h.get("flash").trigger("showPay");
+                        break;
+                    case 107:
+                        n.modal.alert("课程不存在" + t);
+                        break;
+                    case 111:
+                    case 112:
+                        n.modal.alert("黑名单" + t);
+                        break;
+                    case 200:
+                        m.isLogin() ? n.modal.alert("登录态失效，请退出重新登录" + t) : (m.show(), _("视频播放失败，用户未登录", 2730167));
+                        break;
+                    case 201:
+                        n.modal.alert("试听失败" + t);
+                        break;
+                    case 203:
+                        n.modal.alert("禁止下载" + t);
+                        break;
+                    default:
+                        n.modal.alert("播放失败" + t)
+                } else e && "previewover" === e.type ? h.get("flash").trigger("showPay") : n.modal.alert("播放失败" + t)
+            }, n(window).on("resize", o.throttleV2(function() {
+                e.playing && e.resize()
+            }, 20, 50)).on("beforeunload", function() {
+                !e.playend && e.sethistory()
+            }), $({
+                action: "Exposure",
+                ver1: e.course_id
+            })
+        }
+    }
