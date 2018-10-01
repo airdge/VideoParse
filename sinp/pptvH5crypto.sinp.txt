@@ -1,7 +1,7 @@
  /**
  * from: http://static9.pplive.cn/corporate/player/v_20180921114929_06bed7/dist/player-min.js
  * parse: k
- * des: H5端K算法, AES/ECB/NoPadding
+ * des: html5端k算法, AES/ECB/NoPadding
  */
 
  function(e, t, n) {
