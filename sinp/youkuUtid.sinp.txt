@@ -1,0 +1,91 @@
+ /**
+ * from:  apk
+ * parse: utid
+ * des: app端utid算法,JavaScript下用CryptoJS.HmacSHA1不太好用
+ */
+
+ 
+private static String a(byte[] paramArrayOfByte)
+    throws Exception
+  {
+    Mac localMac = Mac.getInstance("HmacSHA1");
+    localMac.init(new SecretKeySpec("d6fc3a4a06adbde89223bvefedc24fecde188aaa9161".getBytes(), localMac.getAlgorithm()));
+    return msh.b(localMac.doFinal(paramArrayOfByte), 2);
+  }
+
+
+
+  private final byte[] c()
+    throws Exception
+  {
+    ByteArrayOutputStream localByteArrayOutputStream = new ByteArrayOutputStream();
+    int m = (int)(System.currentTimeMillis() / 1000L);
+    int n = new Random().nextInt();
+    Object localObject1 = msi.a(m);
+    byte[] arrayOfByte = msi.a(n);
+    localByteArrayOutputStream.write((byte[])localObject1, 0, 4);
+    localByteArrayOutputStream.write(arrayOfByte, 0, 4);
+    localByteArrayOutputStream.write(3);
+    localByteArrayOutputStream.write(0);
+    Object localObject2;
+    try
+    {
+      localObject1 = msj.a(this.a);
+    }
+    catch (Exception localException)
+    {
+      localObject2 = new StringBuilder();
+      ((StringBuilder)localObject2).append("");
+      ((StringBuilder)localObject2).append(new Random().nextInt());
+      localObject2 = ((StringBuilder)localObject2).toString();
+    }
+    localByteArrayOutputStream.write(msi.a(msk.b((String)localObject2)), 0, 4);
+    localByteArrayOutputStream.write(msi.a(msk.b(a(localByteArrayOutputStream.toByteArray()))));
+    return localByteArrayOutputStream.toByteArray();
+  }
+
+
+
+  public class msi
+{
+  public static byte[] a(int paramInt)
+  {
+    int j = (byte)(paramInt % 256);
+    paramInt >>= 8;
+    int k = (byte)(paramInt % 256);
+    paramInt >>= 8;
+    int i = (byte)(paramInt % 256);
+    return new byte[] { (byte)((paramInt >> 8) % 256), i, k, j };
+  }
+}
+
+
+public class msk
+{
+  public static boolean a(String paramString)
+  {
+    return (paramString == null) || (paramString.length() <= 0);
+  }
+  
+  public static int b(String paramString)
+  {
+    int i = paramString.length();
+    int j = 0;
+    if (i > 0)
+    {
+      paramString = paramString.toCharArray();
+      i = 0;
+      for (;;)
+      {
+        k = i;
+        if (j >= paramString.length) {
+          break;
+        }
+        i = i * 31 + paramString[j];
+        j++;
+      }
+    }
+    int k = 0;
+    return k;
+  }
+}
